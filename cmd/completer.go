@@ -11,6 +11,7 @@ var (
 	Commands = map[string]cli.Command{
 		"server": ServerCommand(),
 		"node":   NodeCommand(),
+		"rke":    RKECommand(),
 	}
 	Flags = []cli.Flag{}
 )
@@ -70,6 +71,16 @@ func argumentsCompleter(args []string) []prompt.Suggest {
 				{Text: "ls", Description: "List the Rancher Kubernetes Engine Nodes"},
 				{Text: "add", Description: "Add the Rancher Kubernetes Engine Node"},
 				{Text: "rm", Description: "Remove the Rancher Kubernetes Engine Node"},
+			}
+			return prompt.FilterHasPrefix(subcommands, args[1], true)
+		}
+	case "rke":
+		if len(args) == 2 {
+			subcommands := []prompt.Suggest{
+				{Text: "up", Description: "Bring the cluster up"},
+				{Text: "remove", Description: "Teardown the cluster and clean cluster nodes"},
+				{Text: "config", Description: "Setup cluster configuration"},
+				{Text: "etcd", Description: "etcd snapshot save/restore operations in k8s cluster"},
 			}
 			return prompt.FilterHasPrefix(subcommands, args[1], true)
 		}
