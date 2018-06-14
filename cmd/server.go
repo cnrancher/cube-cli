@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/cnrancher/cube-cli/util"
 	"github.com/urfave/cli"
 )
 
@@ -79,6 +80,12 @@ func serverRun(ctx *cli.Context) error {
 	}
 	if "" == configLocation {
 		return fmt.Errorf("cube server run: require %v", ConfigLocation)
+	}
+
+	// generate JWT RSA256 key file
+	err := util.GenerateRSA256()
+	if err != nil {
+		return err
 	}
 
 	return nil
