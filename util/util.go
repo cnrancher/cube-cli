@@ -4,23 +4,17 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/asn1"
 	"encoding/pem"
-	"github.com/Sirupsen/logrus"
 	"io/ioutil"
-	"math/big"
 	"os"
+
+	"github.com/Sirupsen/logrus"
 )
 
 const (
 	RsaDirectory = "/etc/rancher/cube"
 	RsaBitSize   = 4096
 )
-
-type pkcs1PublicKey struct {
-	N *big.Int
-	E int
-}
 
 func GenerateRSA256() error {
 	// make sure the rsa directory is exist
@@ -93,7 +87,10 @@ func PrivateKeyToPEM(privateKey *rsa.PrivateKey) []byte {
 
 func GeneratePublicKey(privateKey *rsa.PrivateKey) ([]byte, error) {
 	publicKey := privateKey.PublicKey
-	publicDER := MarshalPKCS1PublicKey(&publicKey)
+	publicDER, err := x509.MarshalPKIXPublicKey(&publicKey)
+	if err != nil {
+		return nil, err
+	}
 
 	publicBlock := pem.Block{
 		Type:    "RSA PUBLIC KEY",
@@ -133,13 +130,4 @@ func WriteKeyToFile(keyBytes []byte, saveFileTo string) error {
 	}
 
 	return nil
-}
-
-// MarshalPKCS1PublicKey converts an RSA public key to PKCS#1, ASN.1 DER form.
-func MarshalPKCS1PublicKey(key *rsa.PublicKey) []byte {
-	derBytes, _ := asn1.Marshal(pkcs1PublicKey{
-		N: key.N,
-		E: key.E,
-	})
-	return derBytes
 }
