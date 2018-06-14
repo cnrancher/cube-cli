@@ -85,9 +85,6 @@ func getFlagsSuggests(command cli.Command) []prompt.Suggest {
 		parts := strings.Split(name, ",")
 		for _, part := range parts {
 			prefix := "--"
-			if len(parts) == 1 {
-				prefix = "-"
-			}
 			suggests = append(suggests, prompt.Suggest{
 				Text:        prefix + strings.TrimSpace(part),
 				Description: getUsageForFlag(f),
