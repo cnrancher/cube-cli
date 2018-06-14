@@ -37,6 +37,7 @@ func main() {
 	app.Commands = []cli.Command{
 		cmd.ServerCommand(),
 		cmd.NodeCommand(),
+		cmd.RKECommand(),
 		cmd.PromptCommand(),
 	}
 
