@@ -1,9 +1,16 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/cnrancher/cube-cli/docker"
 	"github.com/cnrancher/cube-cli/util"
+
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/docker/api/types/strslice"
+	"github.com/docker/go-connections/nat"
 	"github.com/urfave/cli"
 )
 
@@ -88,7 +95,48 @@ func serverRun(ctx *cli.Context) error {
 		return err
 	}
 
-	return nil
+	context := context.Background()
+
+	dClient, err := docker.NewClient(context, docker.EngineDefaultSock)
+	if err != nil {
+		return err
+	}
+
+	// assemble *container.Config
+	containerConfig := &container.Config{
+		Image: APIServerImage,
+		Cmd: strslice.StrSlice{
+			"serve",
+			"--listen-addr=0.0.0.0:9500",
+			"--kube-config=" + APIServerKubeConfig,
+		},
+	}
+
+	// assemble *container.HostConfig
+	hostConfig := &container.HostConfig{
+		Mounts: []mount.Mount{
+			{
+				Type:   mount.TypeBind,
+				Source: util.RsaDirectory,
+				Target: util.RsaDirectory,
+			},
+			{
+				Type:   mount.TypeBind,
+				Source: configLocation,
+				Target: APIServerKubeConfig,
+			},
+		},
+		PortBindings: nat.PortMap{
+			"9500/tcp": []nat.PortBinding{
+				{
+					HostIP:   "0.0.0.0",
+					HostPort: port + "/tcp",
+				},
+			},
+		},
+	}
+
+	return docker.CreateOrRestart(context, dClient, containerConfig, hostConfig, nil, APIServerContainerName)
 }
 
 func serverStop(ctx *cli.Context) error {
