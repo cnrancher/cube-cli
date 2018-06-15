@@ -24,7 +24,7 @@ func CreateOrRestart(ctx context.Context, dClient *client.Client, config *contai
 	// check that the container with the specified name exists
 	for _, c := range containers {
 		for _, name := range c.Names {
-			if strings.ContainsAny(name, containerName) {
+			if strings.Contains(name, containerName) {
 				isFound = true
 				containerID = c.ID
 				break
