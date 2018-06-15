@@ -162,6 +162,17 @@ func serverRm(ctx *cli.Context) error {
 }
 
 func serverStatus(ctx *cli.Context) error {
-	fmt.Println("status server")
+	context := context.Background()
+
+	dClient, err := docker.NewClient(context, docker.EngineDefaultSock)
+	if err != nil {
+		return err
+	}
+
+	_, err = docker.StatusContainer(context, dClient, APIServerContainerName)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
