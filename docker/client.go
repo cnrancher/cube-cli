@@ -45,6 +45,9 @@ func CheckEngineVersion(ctx context.Context, dClient *client.Client) error {
 }
 
 func IsSupportVersion(info types.Info, versions []string) (bool, error) {
+	if strings.ContainsAny(info.ServerVersion, "ros") {
+		return true, nil
+	}
 	engineVersion, err := semver.NewVersion(info.ServerVersion)
 	if err != nil {
 		return false, err
