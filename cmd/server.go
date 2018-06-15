@@ -140,8 +140,14 @@ func serverRun(ctx *cli.Context) error {
 }
 
 func serverStop(ctx *cli.Context) error {
-	fmt.Println("stop server")
-	return nil
+	context := context.Background()
+
+	dClient, err := docker.NewClient(context, docker.EngineDefaultSock)
+	if err != nil {
+		return err
+	}
+
+	return docker.StopContainer(context, dClient, APIServerContainerName)
 }
 
 func serverRm(ctx *cli.Context) error {
