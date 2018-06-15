@@ -151,8 +151,14 @@ func serverStop(ctx *cli.Context) error {
 }
 
 func serverRm(ctx *cli.Context) error {
-	fmt.Println("remove server")
-	return nil
+	context := context.Background()
+
+	dClient, err := docker.NewClient(context, docker.EngineDefaultSock)
+	if err != nil {
+		return err
+	}
+
+	return docker.RemoveContainer(context, dClient, APIServerContainerName)
 }
 
 func serverStatus(ctx *cli.Context) error {
