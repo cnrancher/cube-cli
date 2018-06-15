@@ -21,7 +21,7 @@ func StopContainer(ctx context.Context, dClient *client.Client, containerName st
 	// check that the container with the specified name exists
 	for _, c := range containers {
 		for _, name := range c.Names {
-			if strings.ContainsAny(name, containerName) {
+			if strings.Contains(name, containerName) {
 				isFound = true
 				containerID = c.ID
 				break

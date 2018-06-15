@@ -21,7 +21,7 @@ func StatusContainer(ctx context.Context, dClient *client.Client, containerName 
 	// check that the container with the specified name exists
 	for _, c := range containers {
 		for _, name := range c.Names {
-			if strings.ContainsAny(name, containerName) {
+			if strings.Contains(name, containerName) {
 				isFound = true
 				containerStatus = c.Status
 				break
