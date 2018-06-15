@@ -103,6 +103,12 @@ func serverRun(ctx *cli.Context) error {
 	}
 
 	// assemble *container.Config
+	exposedPort, err := nat.NewPort("tcp", "9500")
+	if err != nil {
+		return err
+	}
+	exports := make(nat.PortSet, 1)
+	exports[exposedPort] = struct{}{}
 	containerConfig := &container.Config{
 		Image: APIServerImage,
 		Cmd: strslice.StrSlice{
@@ -110,6 +116,7 @@ func serverRun(ctx *cli.Context) error {
 			"--listen-addr=0.0.0.0:9500",
 			"--kube-config=" + APIServerKubeConfig,
 		},
+		ExposedPorts: exports,
 	}
 
 	// assemble *container.HostConfig
