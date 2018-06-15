@@ -97,7 +97,7 @@ func serverRun(ctx *cli.Context) error {
 
 	context := context.Background()
 
-	dClient, err := docker.NewClient(context, docker.EngineDefaultSock)
+	dClient, err := docker.NewClient(context, docker.SystemDockerSock)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func serverRun(ctx *cli.Context) error {
 func serverStop(ctx *cli.Context) error {
 	context := context.Background()
 
-	dClient, err := docker.NewClient(context, docker.EngineDefaultSock)
+	dClient, err := docker.NewClient(context, docker.SystemDockerSock)
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func serverStop(ctx *cli.Context) error {
 func serverRm(ctx *cli.Context) error {
 	context := context.Background()
 
-	dClient, err := docker.NewClient(context, docker.EngineDefaultSock)
+	dClient, err := docker.NewClient(context, docker.SystemDockerSock)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func serverRm(ctx *cli.Context) error {
 func serverStatus(ctx *cli.Context) error {
 	context := context.Background()
 
-	dClient, err := docker.NewClient(context, docker.EngineDefaultSock)
+	dClient, err := docker.NewClient(context, docker.SystemDockerSock)
 	if err != nil {
 		return err
 	}
