@@ -5,10 +5,12 @@ import (
 	"github.com/urfave/cli"
 )
 
-var (
+const (
 	APIServerKubeConfig    = "/var/lib/rancher/cube/kube-config.yml"
 	APIServerImage         = "cnrancher/cube-apiserver"
 	APIServerContainerName = "cube-apiserver"
+	RKEConfigDefault       = "/var/lib/rancher/cube/rke_config.yml"
+	NodeConfigDefault      = "/var/lib/rancher/cube/node_config.yml"
 )
 
 func defaultAction(fn func(ctx *cli.Context) error) func(ctx *cli.Context) error {

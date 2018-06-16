@@ -7,10 +7,6 @@ import (
 	"github.com/urfave/cli"
 )
 
-const (
-	RKEConfigDefault = "/var/lib/rancher/cube/rke_config.yml"
-)
-
 func RKECommand() cli.Command {
 	return cli.Command{
 		Name:        "rke",
