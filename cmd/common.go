@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	APIServerKubeConfig    = "/etc/rancher/cube/kube-config.yml"
+	APIServerKubeConfig    = "/var/lib/rancher/cube/kube-config.yml"
 	APIServerImage         = "cnrancher/cube-apiserver"
 	APIServerContainerName = "cube-apiserver"
 )
