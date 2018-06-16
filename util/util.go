@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	RsaDirectory = "/etc/rancher/cube"
+	RsaDirectory = "/var/lib/rancher/cube"
 	RsaBitSize   = 4096
 )
 
