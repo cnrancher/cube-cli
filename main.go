@@ -15,6 +15,12 @@ import (
 var VERSION = "v0.0.0-dev"
 
 func main() {
+	if err := mainErr(); err != nil {
+		logrus.Fatal(err)
+	}
+}
+
+func mainErr() error {
 	app := cli.NewApp()
 	app.Name = "cube"
 	app.Version = VERSION
@@ -49,7 +55,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	app.Run(parsed)
+	return app.Run(parsed)
 }
 
 var singleAlphaLetterRegxp = regexp.MustCompile("[a-zA-Z]")
