@@ -9,7 +9,6 @@ import (
 	"github.com/cnrancher/cube-cli/util"
 	rkecmd "github.com/rancher/rke/cmd"
 
-	"github.com/pkg/errors"
 	"github.com/rancher/types/apis/management.cattle.io/v3"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -58,15 +57,18 @@ func NodeCommand() cli.Command {
 					},
 					cli.StringFlag{
 						Name:  Roles,
-						Usage: "Specify node roles, e.g. worker,etcd",
+						Value: "controlplane,worker,etcd",
+						Usage: "Specify node roles",
 					},
 					cli.StringFlag{
 						Name:  User,
-						Usage: "Specify node user, e.g. rancher",
+						Value: "rancher",
+						Usage: "Specify node user",
 					},
 					cli.StringFlag{
 						Name:  SSHKeyPath,
-						Usage: "Specify node ssh key path, e.g. /home/rancher/.ssh/id_rsa",
+						Value: "/home/rancher/.ssh/id_rsa",
+						Usage: "Specify node ssh key path",
 					},
 				},
 
@@ -81,14 +83,6 @@ func NodeCommand() cli.Command {
 						Name:  Address,
 						Usage: "Specify node name, e.g. x.x.x.x",
 					},
-					cli.StringFlag{
-						Name:  User,
-						Usage: "Specify node user, e.g. rancher",
-					},
-					cli.StringFlag{
-						Name:  SSHKeyPath,
-						Usage: "Specify node ssh key path, e.g. /home/rancher/.ssh/id_rsa",
-					},
 				},
 				Action: defaultAction(nodeRm),
 			},
@@ -100,7 +94,7 @@ func nodeLs(ctx *cli.Context) error {
 	config := &v3.RancherKubernetesEngineConfig{}
 	var err error
 
-	if _, err := os.Stat(NodeConfigDefault); err != nil {
+	if _, fErr := os.Stat(NodeConfigDefault); fErr != nil {
 		config, err = util.ReadRKEConfig(RKEConfigDefault)
 	} else {
 		config, err = util.ReadRKEConfig(NodeConfigDefault)
@@ -121,28 +115,15 @@ func nodeAdd(ctx *cli.Context) error {
 	}
 
 	roles := ctx.String(Roles)
-	if "" == roles {
-		logrus.Warnf("cube node add: no roles, will using default all roles")
-		roles = "controlplane,worker,etcd"
-	}
 	rolesList := strings.Split(roles, ",")
 
 	user := ctx.String(User)
-	if "" == user {
-		logrus.Warnf("cube node add: no user, will using default rancher user")
-		user = "rancher"
-	}
-
 	sshKeyPath := ctx.String(SSHKeyPath)
-	if sshKeyPath == "" {
-		logrus.Errorf("cube node add: no ssh key path")
-		return errors.Errorf("cube node add: no ssh key path")
-	}
 
 	config := &v3.RancherKubernetesEngineConfig{}
 	var err error
 
-	if _, err := os.Stat(NodeConfigDefault); err != nil {
+	if _, fErr := os.Stat(NodeConfigDefault); fErr != nil {
 		config, err = util.ReadRKEConfig(RKEConfigDefault)
 	} else {
 		config, err = util.ReadRKEConfig(NodeConfigDefault)
@@ -153,12 +134,15 @@ func nodeAdd(ctx *cli.Context) error {
 		return err
 	}
 
-	for _, node := range config.Nodes {
-		if node.Address == address {
-			logrus.Warnf("cube node add: node already exist")
-			return nil
+	if config.Nodes != nil && len(config.Nodes) > 0 {
+		for _, node := range config.Nodes {
+			if node.Address == address {
+				logrus.Warnf("cube node add: node already exist")
+				return nil
+			}
 		}
 	}
+
 	config.Nodes = append(config.Nodes, v3.RKEConfigNode{
 		Address:    address,
 		Role:       rolesList,
@@ -191,7 +175,7 @@ func nodeRm(ctx *cli.Context) error {
 	config := &v3.RancherKubernetesEngineConfig{}
 	var err error
 
-	if _, err := os.Stat(NodeConfigDefault); err != nil {
+	if _, fErr := os.Stat(NodeConfigDefault); fErr != nil {
 		config, err = util.ReadRKEConfig(RKEConfigDefault)
 	} else {
 		config, err = util.ReadRKEConfig(NodeConfigDefault)
@@ -210,7 +194,7 @@ func nodeRm(ctx *cli.Context) error {
 		}
 	}
 
-	if len(config.Nodes) <= 0 {
+	if config.Nodes == nil || len(config.Nodes) <= 0 {
 		logrus.Warnf("cube node remove: no nodes in config file")
 		return nil
 	}

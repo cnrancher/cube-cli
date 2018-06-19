@@ -20,7 +20,7 @@ Management RancherCUBE API-SERVER.
 					
 Example:
 	# Run the RancherCUBE api-server
-	$ cube server run --port "9500" --kube-config /example/kube-config.yml
+	$ cube server run --port "9600" --kube-config /example/kube-config.yml
 	# Stop the RancherCUBE api-server
 	$ cube server stop
 	# Remove the RancherCUBE api-server
@@ -48,6 +48,7 @@ func ServerCommand() cli.Command {
 				Flags: []cli.Flag{
 					cli.StringFlag{
 						Name:  ServerPort,
+						Value: APIServerPortDefault,
 						Usage: "Specify api-server listen port",
 					},
 					cli.StringFlag{
@@ -82,9 +83,6 @@ func ServerCommand() cli.Command {
 func serverRun(ctx *cli.Context) error {
 	port := ctx.String(ServerPort)
 	configLocation := ctx.String(ConfigLocation)
-	if "" == port {
-		return fmt.Errorf("cube server run: require %v", ServerPort)
-	}
 	if "" == configLocation {
 		return fmt.Errorf("cube server run: require %v", ConfigLocation)
 	}
