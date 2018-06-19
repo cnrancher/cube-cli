@@ -99,7 +99,12 @@ func nodeLs(ctx *cli.Context) error {
 }
 
 func nodeAdd(ctx *cli.Context) error {
-	address := ctx.Args()[0]
+	args := ctx.Args()
+	if len(args) < 1 {
+		return fmt.Errorf("cube node add: no arguments")
+	}
+
+	address := args[0]
 	if "" == address {
 		return fmt.Errorf("cube node add: require %v", Address)
 	}
@@ -150,7 +155,12 @@ func nodeAdd(ctx *cli.Context) error {
 }
 
 func nodeRm(ctx *cli.Context) error {
-	address := ctx.Args()[0]
+	args := ctx.Args()
+	if len(args) < 1 {
+		return fmt.Errorf("cube node remove: no arguments")
+	}
+
+	address := args[0]
 	if "" == address {
 		return fmt.Errorf("cube node remove: require %v", Address)
 	}
@@ -185,7 +195,7 @@ func nodeRm(ctx *cli.Context) error {
 	if len(config.Nodes) == 1 {
 		config.Nodes = []v3.RKEConfigNode{}
 	} else {
-		left := config.Nodes[0 : foundIndex-1]
+		left := config.Nodes[:foundIndex]
 		right := config.Nodes[foundIndex+1:]
 		config.Nodes = util.MergeNodes(left, right)
 	}
