@@ -13,6 +13,7 @@ const (
 	RKEBaseConfigDefault   = "/var/lib/rancher/cube/rke_base.yml"
 	RKEConfigDefault       = "/var/lib/rancher/cube/rke_config.yml"
 	SSHKeyPathDefault      = "/home/rancher/.ssh/id_rsa"
+	KubeConfigLocation     = "/var/lib/rancher/cube/kube_config_rke_config.yml"
 )
 
 func defaultAction(fn func(ctx *cli.Context) error) func(ctx *cli.Context) error {

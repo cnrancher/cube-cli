@@ -16,8 +16,8 @@ import (
 
 const (
 	ServerDescription = `
-Management RancherCUBE API-SERVER. 
-					
+Management RancherCUBE API-SERVER.
+
 Example:
 	# Run the RancherCUBE api-server
 	$ cube server run --port "9600" --kube-config /example/kube-config.yml
@@ -53,6 +53,7 @@ func ServerCommand() cli.Command {
 					},
 					cli.StringFlag{
 						Name:  ConfigLocation,
+						Value: KubeConfigLocation,
 						Usage: "Specify api-server kubernetes config location",
 					},
 				},
