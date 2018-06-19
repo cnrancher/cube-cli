@@ -10,8 +10,8 @@ const (
 	APIServerImage         = "cnrancher/cube-apiserver"
 	APIServerContainerName = "cube-apiserver"
 	APIServerPortDefault   = "9600"
-	RKEConfigDefault       = "/var/lib/rancher/cube/rke_base.yml"
-	NodeConfigDefault      = "/var/lib/rancher/cube/node_config.yml"
+	RKEBaseConfigDefault   = "/var/lib/rancher/cube/rke_base.yml"
+	RKEConfigDefault       = "/var/lib/rancher/cube/rke_config.yml"
 	SSHKeyPathDefault      = "/home/rancher/.ssh/id_rsa"
 )
 

@@ -1,13 +1,11 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
 
 	"github.com/cnrancher/cube-cli/util"
-	rkecmd "github.com/rancher/rke/cmd"
 
 	"github.com/rancher/types/apis/management.cattle.io/v3"
 	"github.com/sirupsen/logrus"
@@ -22,9 +20,9 @@ Example:
 	# List the Rancher Kubernetes Engine Nodes
 	$ cube node ls
 	# Add the Rancher Kubernetes Engine Node
-	$ cube node add --address <address> --roles worker,etcd --user rancher --ssh-key-path /home/rancher/.ssh/id_rsa
+	$ cube node add <address> --roles worker,etcd --user rancher --ssh-key-path /home/rancher/.ssh/id_rsa
 	# Remove the Rancher Kubernetes Engine Node
-	$ cube node rm --address <address>
+	$ cube node rm <address>
 `
 	Address    = "address"
 	Roles      = "roles"
@@ -50,11 +48,8 @@ func NodeCommand() cli.Command {
 				Name:        "add",
 				Usage:       "Add the Rancher Kubernetes Engine Node",
 				Description: "Add the Rancher Kubernetes Engine Node",
+				ArgsUsage:   "<address>",
 				Flags: []cli.Flag{
-					cli.StringFlag{
-						Name:  Address,
-						Usage: "Specify node address, e.g. x.x.x.x",
-					},
 					cli.StringFlag{
 						Name:  Roles,
 						Value: "controlplane,worker,etcd",
@@ -67,7 +62,7 @@ func NodeCommand() cli.Command {
 					},
 					cli.StringFlag{
 						Name:  SSHKeyPath,
-						Value: "/home/rancher/.ssh/id_rsa",
+						Value: SSHKeyPathDefault,
 						Usage: "Specify node ssh key path",
 					},
 				},
@@ -78,13 +73,8 @@ func NodeCommand() cli.Command {
 				Name:        "rm",
 				Usage:       "Remove the Rancher Kubernetes Engine Node",
 				Description: "Remove the Rancher Kubernetes Engine Node",
-				Flags: []cli.Flag{
-					cli.StringFlag{
-						Name:  Address,
-						Usage: "Specify node name, e.g. x.x.x.x",
-					},
-				},
-				Action: defaultAction(nodeRm),
+				ArgsUsage:   "<address>",
+				Action:      defaultAction(nodeRm),
 			},
 		},
 	}
@@ -94,10 +84,10 @@ func nodeLs(ctx *cli.Context) error {
 	config := &v3.RancherKubernetesEngineConfig{}
 	var err error
 
-	if _, fErr := os.Stat(NodeConfigDefault); fErr != nil {
-		config, err = util.ReadRKEConfig(RKEConfigDefault)
+	if _, fErr := os.Stat(RKEConfigDefault); fErr != nil {
+		config, err = util.ReadRKEConfig(RKEBaseConfigDefault)
 	} else {
-		config, err = util.ReadRKEConfig(NodeConfigDefault)
+		config, err = util.ReadRKEConfig(RKEConfigDefault)
 	}
 
 	if err != nil {
@@ -109,7 +99,7 @@ func nodeLs(ctx *cli.Context) error {
 }
 
 func nodeAdd(ctx *cli.Context) error {
-	address := ctx.String(Address)
+	address := ctx.Args()[0]
 	if "" == address {
 		return fmt.Errorf("cube node add: require %v", Address)
 	}
@@ -123,10 +113,10 @@ func nodeAdd(ctx *cli.Context) error {
 	config := &v3.RancherKubernetesEngineConfig{}
 	var err error
 
-	if _, fErr := os.Stat(NodeConfigDefault); fErr != nil {
-		config, err = util.ReadRKEConfig(RKEConfigDefault)
+	if _, fErr := os.Stat(RKEConfigDefault); fErr != nil {
+		config, err = util.ReadRKEConfig(RKEBaseConfigDefault)
 	} else {
-		config, err = util.ReadRKEConfig(NodeConfigDefault)
+		config, err = util.ReadRKEConfig(RKEConfigDefault)
 	}
 
 	if err != nil {
@@ -150,14 +140,7 @@ func nodeAdd(ctx *cli.Context) error {
 		SSHKeyPath: sshKeyPath,
 	})
 
-	context := context.Background()
-	_, _, _, _, _, err = rkecmd.ClusterUp(context, config, nil, nil, nil, false, "", false, true)
-	if err != nil {
-		logrus.Errorf("cube node add: execute rke command error %v", err)
-		return err
-	}
-
-	err = util.WriteRKEConfig(config, NodeConfigDefault)
+	err = util.WriteRKEConfig(config, RKEConfigDefault)
 	if err != nil {
 		logrus.Errorf("cube node add: write rke config file error %v", err)
 		return err
@@ -167,7 +150,7 @@ func nodeAdd(ctx *cli.Context) error {
 }
 
 func nodeRm(ctx *cli.Context) error {
-	address := ctx.String(Address)
+	address := ctx.Args()[0]
 	if "" == address {
 		return fmt.Errorf("cube node remove: require %v", Address)
 	}
@@ -175,10 +158,10 @@ func nodeRm(ctx *cli.Context) error {
 	config := &v3.RancherKubernetesEngineConfig{}
 	var err error
 
-	if _, fErr := os.Stat(NodeConfigDefault); fErr != nil {
-		config, err = util.ReadRKEConfig(RKEConfigDefault)
+	if _, fErr := os.Stat(RKEConfigDefault); fErr != nil {
+		config, err = util.ReadRKEConfig(RKEBaseConfigDefault)
 	} else {
-		config, err = util.ReadRKEConfig(NodeConfigDefault)
+		config, err = util.ReadRKEConfig(RKEConfigDefault)
 	}
 
 	if err != nil {
@@ -207,14 +190,7 @@ func nodeRm(ctx *cli.Context) error {
 		config.Nodes = util.MergeNodes(left, right)
 	}
 
-	context := context.Background()
-	_, _, _, _, _, err = rkecmd.ClusterUp(context, config, nil, nil, nil, false, "", false, true)
-	if err != nil {
-		logrus.Errorf("cube node remove: execute rke command error %v", err)
-		return err
-	}
-
-	err = util.WriteRKEConfig(config, NodeConfigDefault)
+	err = util.WriteRKEConfig(config, RKEConfigDefault)
 	if err != nil {
 		logrus.Errorf("cube node remove: write rke config error %v", err)
 		return err
