@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/cnrancher/cube-cli/docker"
-	"github.com/cnrancher/cube-cli/util"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
@@ -107,7 +106,6 @@ func serverRun(ctx *cli.Context) error {
 		Cmd: strslice.StrSlice{
 			"serve",
 			"--listen-addr=0.0.0.0:9500",
-			"--kube-config=" + APIServerKubeConfig,
 		},
 		ExposedPorts: exports,
 	}
