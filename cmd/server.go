@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/cnrancher/cube-cli/cmd/pkg/table"
 	"github.com/cnrancher/cube-cli/docker"
 
 	"github.com/docker/docker/api/types/container"
@@ -39,6 +40,7 @@ func ServerCommand() cli.Command {
 		Usage:       "Operations with cube api-server",
 		Description: ServerDescription,
 		Action:      defaultAction(serverStatus),
+		Flags:       table.WriterFlags(),
 		Subcommands: []cli.Command{
 			{
 				Name:        "run",
@@ -74,6 +76,7 @@ func ServerCommand() cli.Command {
 				Name:        "status",
 				Usage:       "Status the RancherCUBE api-server",
 				Description: "Status the RancherCUBE api-server",
+				Flags:       table.WriterFlags(),
 				Action:      defaultAction(serverStatus),
 			},
 		},
@@ -162,10 +165,27 @@ func serverStatus(ctx *cli.Context) error {
 		return err
 	}
 
-	_, err = docker.StatusContainer(context, dClient, APIServerContainerName)
+	container, err := docker.StatusContainer(context, dClient, APIServerContainerName)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	writer := &table.Writer{}
+
+	writer = writer.NewWriter([][]string{
+		{"CONTAINER ID", "{{.ID | id}}"},
+		{"IMAGE", "{{.Image}}"},
+		{"COMMAND", "{{.Command | cmd}}"},
+		{"CREATED", "{{.Created | ago}}"},
+		{"STATUS", "{{.Status}}"},
+		{"PORTS", "{{.Ports | port}}"},
+		{"NAMES", "{{.Names | name}}"},
+	}, ctx)
+	defer writer.Close()
+
+	if container.ID != "" {
+		writer.Write(container)
+	}
+
+	return writer.Err()
 }

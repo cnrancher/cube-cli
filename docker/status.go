@@ -9,21 +9,21 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func StatusContainer(ctx context.Context, dClient *client.Client, containerName string) (string, error) {
+func StatusContainer(ctx context.Context, dClient *client.Client, containerName string) (*types.Container, error) {
 	containers, err := dClient.ContainerList(ctx, types.ContainerListOptions{All: true})
 	if err != nil {
 		logrus.Errorf("list docker containers error: %v", err)
-		return "", err
+		return nil, err
 	}
 
 	isFound := false
-	containerStatus := ""
+	container := &types.Container{}
 	// check that the container with the specified name exists
 	for _, c := range containers {
 		for _, name := range c.Names {
 			if strings.Contains(name, containerName) {
 				isFound = true
-				containerStatus = c.Status
+				container = &c
 				break
 			}
 		}
@@ -32,13 +32,5 @@ func StatusContainer(ctx context.Context, dClient *client.Client, containerName 
 		}
 	}
 
-	if isFound && containerStatus != "" {
-		// status the container
-		logrus.Info(containerStatus)
-		return containerStatus, nil
-	}
-
-	logrus.Warnf("container not found")
-
-	return "NotFound", nil
+	return container, nil
 }

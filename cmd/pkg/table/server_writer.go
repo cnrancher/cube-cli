@@ -2,11 +2,12 @@ package table
 
 import (
 	"encoding/json"
-	"html/template"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
 	"text/tabwriter"
+	"text/template"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -147,8 +148,8 @@ func FormatContainerCommand(data interface{}) (string, error) {
 		return "", nil
 	}
 
-	if len(command) > 15 {
-		return command[:15], nil
+	if len(command) > 25 {
+		return command[:25], nil
 	}
 
 	return command, nil
@@ -158,9 +159,9 @@ func FormatContainerName(data []string) (string, error) {
 	names := ""
 	for index, name := range data {
 		if index == 0 {
-			names += name[1 : len(name)-1]
+			names += name[1:]
 		} else {
-			names += " " + name[1:len(name)-1]
+			names += " " + name[1:]
 		}
 	}
 
@@ -171,13 +172,13 @@ func FormatContainerPort(data []types.Port) (string, error) {
 	ports := ""
 	for index, port := range data {
 		if index == 0 {
-			ports += port.IP + ":" + strconv.Itoa(int(port.PublicPort)) + "-" + strconv.Itoa(int(port.PrivatePort)) + "/" + port.Type
+			ports += port.IP + ":" + strconv.Itoa(int(port.PublicPort)) + "->" + strconv.Itoa(int(port.PrivatePort)) + "/" + port.Type
 		} else {
-			ports += " " + port.IP + ":" + strconv.Itoa(int(port.PublicPort)) + "-" + strconv.Itoa(int(port.PrivatePort)) + "/" + port.Type
+			ports += " " + port.IP + ":" + strconv.Itoa(int(port.PublicPort)) + "->" + strconv.Itoa(int(port.PrivatePort)) + "/" + port.Type
 		}
 	}
 
-	return ports, nil
+	return fmt.Sprintf("%s", ports), nil
 }
 
 func FormatContainerCreated(data interface{}) (string, error) {
