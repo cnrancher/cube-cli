@@ -88,12 +88,6 @@ func serverRun(ctx *cli.Context) error {
 		return fmt.Errorf("cube server run: require %v", ConfigLocation)
 	}
 
-	// generate JWT RSA256 key file
-	err := util.GenerateRSA256()
-	if err != nil {
-		return err
-	}
-
 	context := context.Background()
 
 	dClient, err := docker.NewClient(context, docker.SystemDockerSock)
@@ -121,11 +115,6 @@ func serverRun(ctx *cli.Context) error {
 	// assemble *container.HostConfig
 	hostConfig := &container.HostConfig{
 		Mounts: []mount.Mount{
-			{
-				Type:   mount.TypeBind,
-				Source: util.RsaDirectory,
-				Target: util.RsaDirectory,
-			},
 			{
 				Type:   mount.TypeBind,
 				Source: configLocation,
