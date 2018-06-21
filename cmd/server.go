@@ -40,7 +40,7 @@ func ServerCommand() cli.Command {
 		Usage:       "Operations with cube api-server",
 		Description: ServerDescription,
 		Action:      defaultAction(serverStatus),
-		Flags:       table.WriterFlags(),
+		Flags:       table.WriterServerFlags(),
 		Subcommands: []cli.Command{
 			{
 				Name:        "run",
@@ -76,7 +76,7 @@ func ServerCommand() cli.Command {
 				Name:        "status",
 				Usage:       "Status the RancherCUBE api-server",
 				Description: "Status the RancherCUBE api-server",
-				Flags:       table.WriterFlags(),
+				Flags:       table.WriterServerFlags(),
 				Action:      defaultAction(serverStatus),
 			},
 		},
@@ -98,7 +98,7 @@ func serverRun(ctx *cli.Context) error {
 	}
 
 	// assemble *container.Config
-	exposedPort, err := nat.NewPort("tcp", "9500")
+	exposedPort, err := nat.NewPort("tcp", "9600")
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func serverRun(ctx *cli.Context) error {
 		Image: APIServerImage,
 		Cmd: strslice.StrSlice{
 			"serve",
-			"--listen-addr=0.0.0.0:9500",
+			"--listen-addr=0.0.0.0:9600",
 		},
 		ExposedPorts: exports,
 	}
@@ -123,7 +123,7 @@ func serverRun(ctx *cli.Context) error {
 			},
 		},
 		PortBindings: nat.PortMap{
-			"9500/tcp": []nat.PortBinding{
+			"9600/tcp": []nat.PortBinding{
 				{
 					HostIP:   "0.0.0.0",
 					HostPort: port + "/tcp",
@@ -170,9 +170,7 @@ func serverStatus(ctx *cli.Context) error {
 		return err
 	}
 
-	writer := &table.Writer{}
-
-	writer = writer.NewWriter([][]string{
+	writer := table.NewServerWriter([][]string{
 		{"CONTAINER ID", "{{.ID | id}}"},
 		{"IMAGE", "{{.Image}}"},
 		{"COMMAND", "{{.Command | cmd}}"},

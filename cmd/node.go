@@ -3,13 +3,17 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/user"
 	"strings"
 
+	"github.com/cnrancher/cube-cli/cmd/pkg/table"
 	"github.com/cnrancher/cube-cli/util"
 
+	"github.com/cnrancher/cube-cli/k8s"
 	"github.com/rancher/types/apis/management.cattle.io/v3"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	"k8s.io/api/core/v1"
 )
 
 const (
@@ -20,7 +24,7 @@ Example:
 	# List the Rancher Kubernetes Engine Nodes
 	$ cube node ls
 	# Add the Rancher Kubernetes Engine Node
-	$ cube node add <address> --roles worker,etcd --user rancher --ssh-key-path /home/rancher/.ssh/id_rsa
+	$ cube node add <address> --roles worker,etcd --user rancher --ssh-key-path <user_directory>/.ssh/id_rsa
 	# Remove the Rancher Kubernetes Engine Node
 	$ cube node rm <address>
 `
@@ -30,18 +34,35 @@ Example:
 	SSHKeyPath = "ssh-key-path"
 )
 
+type NodeOutput struct {
+	Config v3.RKEConfigNode `yaml:"config,omitempty" json:"config,omitempty"`
+	Sync   bool             `yaml:"sync,omitempty" json:"sync,omitempty"`
+}
+
+func assembleSSHKeyPath() string {
+	home := "/home/rancher"
+	user, err := user.Current()
+	if err == nil {
+		home = user.HomeDir
+	}
+
+	return fmt.Sprintf(SSHKeyPathDefault, home)
+}
+
 func NodeCommand() cli.Command {
 	return cli.Command{
 		Name:        "node",
 		Aliases:     []string{"n"},
 		Usage:       "Management Rancher Kubernetes Engine Node",
 		Description: NodeDescription,
+		Flags:       table.WriterNodeFlags(),
 		Action:      defaultAction(nodeLs),
 		Subcommands: []cli.Command{
 			{
 				Name:        "ls",
 				Usage:       "List the Rancher Kubernetes Engine Nodes",
 				Description: "List the Rancher Kubernetes Engine Nodes",
+				Flags:       table.WriterNodeFlags(),
 				Action:      defaultAction(nodeLs),
 			},
 			{
@@ -62,7 +83,7 @@ func NodeCommand() cli.Command {
 					},
 					cli.StringFlag{
 						Name:  SSHKeyPath,
-						Value: SSHKeyPathDefault,
+						Value: assembleSSHKeyPath(),
 						Usage: "Specify node ssh key path",
 					},
 				},
@@ -94,8 +115,52 @@ func nodeLs(ctx *cli.Context) error {
 		logrus.Errorf("%v", err)
 		return err
 	}
-	logrus.Infof("%v", config)
-	return nil
+
+	// retrieve form kubernetes backend
+	client := k8s.NewClientGenerator(KubeConfigLocation)
+	nodes, err := client.Clientset.CoreV1().Nodes().List(util.ListEverything)
+	if err != nil {
+		logrus.Errorf("can not retrieve kubernetes nodes: %v", err)
+		return err
+	}
+
+	// whether rke config file nodes match kubernetes nodes or not
+	isSyncMap := map[string]bool{}
+	for _, node := range nodes.Items {
+		for _, address := range node.Status.Addresses {
+			if address.Type == v1.NodeInternalIP {
+				isSyncMap[address.Address] = true
+				break
+			}
+		}
+	}
+
+	writer := table.NewNodeWriter([][]string{
+		{"ADDRESS", "{{.Config.Address}}"},
+		{"ROLE", "{{.Config.Role}}"},
+		{"USER", "{{.Config.User}}"},
+		{"SSH KEY PATH", "{{.Config.SSHKeyPath}}"},
+		{"SYNC", "{{.Sync}}"},
+	}, ctx)
+	defer writer.Close()
+
+	for _, node := range config.Nodes {
+		if _, ok := isSyncMap[node.Address]; ok {
+			output := &NodeOutput{
+				Config: node,
+				Sync:   true,
+			}
+			writer.Write(*output)
+		} else {
+			output := &NodeOutput{
+				Config: node,
+				Sync:   true,
+			}
+			writer.Write(*output)
+		}
+	}
+
+	return writer.Err()
 }
 
 func nodeAdd(ctx *cli.Context) error {

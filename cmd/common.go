@@ -12,7 +12,7 @@ const (
 	APIServerPortDefault   = "9600"
 	RKEBaseConfigDefault   = "/var/lib/rancher/cube/rke_base.yml"
 	RKEConfigDefault       = "/var/lib/rancher/cube/rke_config.yml"
-	SSHKeyPathDefault      = "/home/rancher/.ssh/id_rsa"
+	SSHKeyPathDefault      = "%s/.ssh/id_rsa"
 	KubeConfigLocation     = "/var/lib/rancher/cube/kube_config_rke_config.yml"
 )
 
