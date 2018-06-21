@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	APIServerKubeConfig    = "/var/lib/rancher/cube/kube-config.yml"
+	APIServerKubeConfig    = "/var/lib/rancher/cube"
 	APIServerImage         = "cnrancher/cube-apiserver"
 	APIServerContainerName = "cube-apiserver"
 	APIServerPortDefault   = "9600"

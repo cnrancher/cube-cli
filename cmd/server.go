@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/cnrancher/cube-cli/cmd/pkg/table"
 	"github.com/cnrancher/cube-cli/docker"
@@ -20,7 +21,7 @@ Management RancherCUBE API-SERVER.
 
 Example:
 	# Run the RancherCUBE api-server
-	$ cube server run --port "9600" --kube-config /example/kube-config.yml
+	$ cube server run --port "9600"
 	# Stop the RancherCUBE api-server
 	$ cube server stop
 	# Remove the RancherCUBE api-server
@@ -90,6 +91,13 @@ func serverRun(ctx *cli.Context) error {
 		return fmt.Errorf("cube server run: require %v", ConfigLocation)
 	}
 
+	if configLocation != KubeConfigLocation {
+		err := os.Rename(configLocation, KubeConfigLocation)
+		if err != nil {
+			return err
+		}
+	}
+
 	context := context.Background()
 
 	dClient, err := docker.NewClient(context, docker.SystemDockerSock)
@@ -118,7 +126,7 @@ func serverRun(ctx *cli.Context) error {
 		Mounts: []mount.Mount{
 			{
 				Type:   mount.TypeBind,
-				Source: configLocation,
+				Source: APIServerKubeConfig,
 				Target: APIServerKubeConfig,
 			},
 		},
