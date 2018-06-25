@@ -41,6 +41,7 @@ func CreateOrRestart(ctx context.Context, dClient *client.Client, config *contai
 			logrus.Errorf("restart container %s error: %v", containerID, err)
 			return err
 		}
+		logrus.Infof("server run at 0.0.0.0:9600")
 		return nil
 	}
 
@@ -50,6 +51,7 @@ func CreateOrRestart(ctx context.Context, dClient *client.Client, config *contai
 		logrus.Errorf("get host name error: %v", err)
 		return err
 	}
+
 	// TODO: currently only support docker.io, this need to be enhanced to support multiple registry
 	parseMap := make(map[string]PrivateRegistry)
 	for _, pr := range parseMap {
@@ -75,6 +77,8 @@ func CreateOrRestart(ctx context.Context, dClient *client.Client, config *contai
 		logrus.Errorf("start container %s error: %v", containerID, err)
 		return err
 	}
+
+	logrus.Infof("server run at 0.0.0.0:9600")
 
 	return nil
 }

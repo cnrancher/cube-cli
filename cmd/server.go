@@ -123,6 +123,10 @@ func serverRun(ctx *cli.Context) error {
 
 	// assemble *container.HostConfig
 	hostConfig := &container.HostConfig{
+		RestartPolicy: container.RestartPolicy{
+			Name:              "always",
+			MaximumRetryCount: 0,
+		},
 		Mounts: []mount.Mount{
 			{
 				Type:   mount.TypeBind,
