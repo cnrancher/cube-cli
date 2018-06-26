@@ -154,7 +154,7 @@ func nodeLs(ctx *cli.Context) error {
 		} else {
 			output := &NodeOutput{
 				Config: node,
-				Sync:   true,
+				Sync:   false,
 			}
 			writer.Write(*output)
 		}
